@@ -1,0 +1,25 @@
+{
+  "name": "silinternational/idp-pw-api-passwordstore-ldap",
+  "description": "LDAP Password Store component for IdP PW API",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Phillip Shipley",
+      "email": "phillip_shipley@sil.org"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=5.4.0",
+    "silinternational/idp-pw-api-common": "dev-master",
+    "adldap2/adldap2": "^6.0.14"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Sil\\IdpPw\\PasswordStore\\": "src/"
+    }
+  }
+}
