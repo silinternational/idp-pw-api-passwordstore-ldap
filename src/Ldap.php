@@ -4,6 +4,7 @@ namespace Sil\IdpPw\PasswordStore;
 use Adldap\Adldap;
 use Adldap\Connections\Provider;
 use Adldap\Exceptions\Auth\BindException;
+use Adldap\Schemas\OpenLDAP;
 use Sil\IdpPw\Common\PasswordStore\PasswordStoreInterface;
 use Sil\IdpPw\Common\PasswordStore\UserNotFoundException;
 use Sil\IdpPw\Common\PasswordStore\UserPasswordMeta;
@@ -80,6 +81,7 @@ class Ldap extends Component implements PasswordStoreInterface
         /*
          * Initialize provider with configuration
          */
+        $schema = new OpenLDAP();
         $this->ldapProvider = new Provider([
             'base_dn' => $this->baseDn,
             'domain_controllers' => [$this->host],
@@ -88,13 +90,14 @@ class Ldap extends Component implements PasswordStoreInterface
             'admin_password' => $this->adminPassword,
             'use_ssl' => $this->useSsl,
             'use_tls' => $this->useTls,
-        ]);
+        ], null, $schema);
 
         $this->ldapClient = new Adldap();
         $this->ldapClient->addProvider('default', $this->ldapProvider);
 
         try {
             $this->ldapClient->connect('default');
+            $this->ldapProvider->auth()->bindAsAdministrator();
         } catch (BindException $e) {
             throw $e;
         }
@@ -163,7 +166,12 @@ class Ldap extends Component implements PasswordStoreInterface
         /*
          * Update password
          */
-        $user->setAttribute($this->userPasswordAttribute, '"' . $password . '"');
+        try{
+            $user->updateAttribute($this->userPasswordAttribute, $password);
+        } catch (\Exception $e) {
+            die($this->ldapProvider->getConnection()->getDiagnosticMessage());
+        }
+
 
         /*
          * Remove any attributes that should be removed after changing password

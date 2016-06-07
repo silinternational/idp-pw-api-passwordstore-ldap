@@ -8,11 +8,17 @@
       "email": "phillip_shipley@sil.org"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/silinternational/Adldap2.git"
+    }
+  ],
   "minimum-stability": "stable",
   "require": {
     "php": ">=5.4.0",
     "silinternational/idp-pw-api-common": "dev-master",
-    "adldap2/adldap2": "^6.0.14"
+    "adldap2/adldap2": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.0"

@@ -15,7 +15,7 @@ class LdapTest extends \PHPUnit_Framework_TestCase
         $ldap->baseDn = 'ou=gis_affiliated_person,dc=acme,dc=org';
         $ldap->adminUsername = 'cn=Manager,dc=acme,dc=org';
         $ldap->adminPassword = 'admin';
-        $ldap->useTls = false;
+        $ldap->useTls = true;
         $ldap->useSsl = false;
         $ldap->employeeIdAttribute = 'gisEisPersonId';
         $ldap->passwordLastChangeDateAttribute = 'pwdchangedtime';
@@ -24,7 +24,7 @@ class LdapTest extends \PHPUnit_Framework_TestCase
         $userMeta = $ldap->getMeta('10101');
         $this->assertInstanceOf('\Sil\IdpPw\Common\PasswordStore\UserPasswordMeta', $userMeta);
         $this->assertNotNull($userMeta->passwordExpireDate);
-        $this->assertNotNull($userMeta->passwordLastChangeDate);
+
     }
 
     public function testGetMetaDoesntExist()
@@ -35,7 +35,7 @@ class LdapTest extends \PHPUnit_Framework_TestCase
         $ldap->baseDn = 'ou=gis_affiliated_person,dc=acme,dc=org';
         $ldap->adminUsername = 'cn=Manager,dc=acme,dc=org';
         $ldap->adminPassword = 'admin';
-        $ldap->useTls = false;
+        $ldap->useTls = true;
         $ldap->useSsl = false;
         $ldap->employeeIdAttribute = 'gisEisPersonId';
         $ldap->passwordLastChangeDateAttribute = 'pwdchangedtime';
@@ -53,7 +53,7 @@ class LdapTest extends \PHPUnit_Framework_TestCase
         $ldap->baseDn = 'ou=gis_affiliated_person,dc=acme,dc=org';
         $ldap->adminUsername = 'cn=Manager,dc=acme,dc=org';
         $ldap->adminPassword = 'admin';
-        $ldap->useTls = false;
+        $ldap->useTls = true;
         $ldap->useSsl = false;
         $ldap->employeeIdAttribute = 'gisEisPersonId';
         $ldap->passwordLastChangeDateAttribute = 'pwdchangedtime';
@@ -64,6 +64,5 @@ class LdapTest extends \PHPUnit_Framework_TestCase
 
         $userMeta = $ldap->set('10101', 'testpass');
         $this->assertInstanceOf('\Sil\IdpPw\Common\PasswordStore\UserPasswordMeta', $userMeta);
-        die(print_r($userMeta));
     }
 }
