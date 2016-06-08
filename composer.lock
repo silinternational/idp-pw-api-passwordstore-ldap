@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "82f05e90c48b81171fcb230226049649",
-    "content-hash": "37b0abede344c286afbaf9eae73eeefa",
+    "hash": "3a5da68aa84266df4bafabc498410fa9",
+    "content-hash": "29aee0f57581f3f7613d678c2dc684c1",
     "packages": [
         {
             "name": "adldap2/adldap2",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/silinternational/Adldap2.git",
-                "reference": "e29007c7fbadbcac93d29e74e033b2baf0268ebc"
+                "url": "https://github.com/fillup/Adldap2.git",
+                "reference": "f97a0d5b4898e1241944cec323c084fa9d0af989"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/silinternational/Adldap2/zipball/e29007c7fbadbcac93d29e74e033b2baf0268ebc",
-                "reference": "e29007c7fbadbcac93d29e74e033b2baf0268ebc",
+                "url": "https://api.github.com/repos/fillup/Adldap2/zipball/f97a0d5b4898e1241944cec323c084fa9d0af989",
+                "reference": "f97a0d5b4898e1241944cec323c084fa9d0af989",
                 "shasum": ""
             },
             "archive": {
@@ -71,7 +71,7 @@
                 "issues": "https://github.com/Adldap2/Adldap2/issues",
                 "source": "https://github.com/Adldap2/Adldap2"
             },
-            "time": "2016-06-07 14:06:50"
+            "time": "2016-06-08 15:47:01"
         },
         {
             "name": "bower-asset/jquery",
