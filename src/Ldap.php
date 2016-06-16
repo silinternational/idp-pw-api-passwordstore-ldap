@@ -169,7 +169,7 @@ class Ldap extends Component implements PasswordStoreInterface
         try{
             $user->updateAttribute($this->userPasswordAttribute, $password);
         } catch (\Exception $e) {
-            die($this->ldapProvider->getConnection()->getDiagnosticMessage());
+            throw new \Exception('Unable to update user\'s password, server error.', 1464018255, $e);
         }
 
 
