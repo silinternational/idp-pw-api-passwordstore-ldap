@@ -198,10 +198,25 @@ class Ldap extends Component implements PasswordStoreInterface
          */
         try {
             if ( ! $user->save()) {
-                throw new \Exception('Unable to update user\'s password', 1464018238);
+                throw new \Exception('Unable to change password.', 1464018238);
             }
         } catch (\Exception $e) {
-            throw new \Exception('Unable to update user\'s password, server error.', 1464018242, $e);
+            /*
+             * Check if failure is due to constraint violation
+             */
+            $error = strtolower($e->getMessage());
+            if (substr_count($error, 'constraint violation') > 0) {
+                throw new \Exception(
+                    'Unable to change password. If this password has been used before please use something different.',
+                    1464018242,
+                    $e
+                );
+            }
+
+            /*
+             * throw generic failure exception
+             */
+            throw new \Exception('Unable to change password, server error.', 1464018242, $e);
         }
 
         return $this->getMeta($employeeId);
