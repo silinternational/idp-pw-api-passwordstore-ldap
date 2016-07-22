@@ -6,6 +6,7 @@ use Adldap\Connections\Provider;
 use Adldap\Exceptions\Auth\BindException;
 use Adldap\Schemas\OpenLDAP;
 use Sil\IdpPw\Common\PasswordStore\PasswordStoreInterface;
+use Sil\IdpPw\Common\PasswordStore\PasswordReuseException;
 use Sil\IdpPw\Common\PasswordStore\UserNotFoundException;
 use Sil\IdpPw\Common\PasswordStore\UserPasswordMeta;
 use yii\base\Component;
@@ -204,7 +205,7 @@ class Ldap extends Component implements PasswordStoreInterface
              */
             $error = strtolower($e->getMessage());
             if (substr_count($error, 'constraint violation') > 0) {
-                throw new \Exception(
+                throw new PasswordReuseException(
                     'Unable to change password. If this password has been used before please use something different.',
                     1464018255,
                     $e

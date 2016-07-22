@@ -554,12 +554,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/silinternational/idp-pw-api-common.git",
-                "reference": "f5592d97cf6f9b283e318885997cb6e490a3a381"
+                "reference": "21e73c236a69b03b678b02d0f5376c76c3247f2f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/silinternational/idp-pw-api-common/zipball/f5592d97cf6f9b283e318885997cb6e490a3a381",
-                "reference": "f5592d97cf6f9b283e318885997cb6e490a3a381",
+                "url": "https://api.github.com/repos/silinternational/idp-pw-api-common/zipball/21e73c236a69b03b678b02d0f5376c76c3247f2f",
+                "reference": "21e73c236a69b03b678b02d0f5376c76c3247f2f",
                 "shasum": ""
             },
             "require": {
@@ -586,7 +586,7 @@
                 }
             ],
             "description": "Common interfaces and bases classes for integration components.",
-            "time": "2016-06-29 20:20:03"
+            "time": "2016-07-20 12:38:09"
         },
         {
             "name": "yiisoft/yii2",
@@ -1232,16 +1232,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "4.8.26",
+            "version": "4.8.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "fc1d8cd5b5de11625979125c5639347896ac2c74"
+                "reference": "c062dddcb68e44b563f66ee319ddae2b5a322a90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/fc1d8cd5b5de11625979125c5639347896ac2c74",
-                "reference": "fc1d8cd5b5de11625979125c5639347896ac2c74",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c062dddcb68e44b563f66ee319ddae2b5a322a90",
+                "reference": "c062dddcb68e44b563f66ee319ddae2b5a322a90",
                 "shasum": ""
             },
             "require": {
@@ -1300,7 +1300,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2016-05-17 03:09:28"
+            "time": "2016-07-21 06:48:14"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
