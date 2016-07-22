@@ -186,9 +186,7 @@ class Ldap extends Component implements PasswordStoreInterface
          * Update flag attributes after changing password
          */
         foreach ($this->updateAttributesOnSetPassword as $key => $value) {
-            if ($user->hasAttribute($key)) {
-                $user->updateAttribute($key, $value);
-            } else {
+            if ( ! $user->hasAttribute($key)) {
                 $user->setAttribute($key, $value);
             }
         }
@@ -208,7 +206,7 @@ class Ldap extends Component implements PasswordStoreInterface
             if (substr_count($error, 'constraint violation') > 0) {
                 throw new \Exception(
                     'Unable to change password. If this password has been used before please use something different.',
-                    1464018242,
+                    1464018255,
                     $e
                 );
             }
