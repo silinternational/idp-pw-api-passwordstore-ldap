@@ -197,7 +197,9 @@ class Ldap extends Component implements PasswordStoreInterface
          * Update flag attributes after changing password
          */
         foreach ($this->updateAttributesOnSetPassword as $key => $value) {
-            if ( ! $user->hasAttribute($key) && ! $user->hasAttribute(strtolower($key))) {
+            if ($user->hasAttribute($key) || $user->hasAttribute(strtolower($key))) {
+                $user->updateAttribute($key, $value);
+            } else {
                 $user->setAttribute($key, $value);
             }
         }
