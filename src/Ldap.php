@@ -5,6 +5,7 @@ use Adldap\Adldap;
 use Adldap\Connections\Provider;
 use Adldap\Exceptions\Auth\BindException;
 use Adldap\Schemas\OpenLDAP;
+use Sil\IdpPw\Common\PasswordStore\AccountLockedException;
 use Sil\IdpPw\Common\PasswordStore\PasswordStoreInterface;
 use Sil\IdpPw\Common\PasswordStore\PasswordReuseException;
 use Sil\IdpPw\Common\PasswordStore\UserNotFoundException;
@@ -45,6 +46,12 @@ class Ldap extends Component implements PasswordStoreInterface
 
     /** @var string */
     public $userPasswordAttribute;
+
+    /** @var string */
+    public $userAccountDisabledAttribute;
+
+    /** @var string */
+    public $userAccountDisabledValue;
 
     /**
      * Single dimension array of attribute names to be removed after password is changed.
@@ -112,18 +119,12 @@ class Ldap extends Component implements PasswordStoreInterface
      */
     public function getMeta($employeeId)
     {
-        $this->connect();
-        try {
-            /** @var \Adldap\Models\Entry $user */
-            $user = $this->ldapProvider->search()
-                ->select([
-                    $this->passwordExpireDateAttribute,
-                    $this->passwordLastChangeDateAttribute
-                ])
-                ->findByOrFail($this->employeeIdAttribute, $employeeId);
-        } catch (\Exception $e) {
-            throw new UserNotFoundException('User not found', 1463493611, $e);
-        }
+        $user = $this->findUser($employeeId);
+
+        /*
+         * Make sure user is not disabled
+         */
+        $this->assertUserNotDisabled($user);
 
         /*
          * Get Password expires value
@@ -155,14 +156,12 @@ class Ldap extends Component implements PasswordStoreInterface
      */
     public function set($employeeId, $password)
     {
-        $this->connect();
-        try {
-            /** @var \Adldap\Models\Entry $user */
-            $user = $this->ldapProvider->search()
-                ->findByOrFail($this->employeeIdAttribute, $employeeId);
-        } catch (\Exception $e) {
-            throw new UserNotFoundException('User not found', 1463493653, $e);
-        }
+        $user = $this->findUser($employeeId);
+
+        /*
+         * Make sure user is not disabled
+         */
+        $this->assertUserNotDisabled($user);
 
         /*
          * Update password
@@ -183,13 +182,17 @@ class Ldap extends Component implements PasswordStoreInterface
             }
         }
 
+        /*
+         * Reload user after password change
+         */
+        $user = $this->findUser($employeeId);
 
         /*
          * Remove any attributes that should be removed after changing password
          */
         foreach ($this->removeAttributesOnSetPassword as $removeAttr) {
             if($user->hasAttribute($removeAttr) || $user->hasAttribute(strtolower($removeAttr))) {
-                $user->setAttribute($removeAttr, null);
+                $user->deleteAttribute($removeAttr);
             }
         }
 
@@ -200,7 +203,7 @@ class Ldap extends Component implements PasswordStoreInterface
             if ($user->hasAttribute($key) || $user->hasAttribute(strtolower($key))) {
                 $user->updateAttribute($key, $value);
             } else {
-                $user->setAttribute($key, $value);
+                $user->createAttribute($key, $value);
             }
         }
 
@@ -220,4 +223,70 @@ class Ldap extends Component implements PasswordStoreInterface
 
         return $this->getMeta($employeeId);
     }
+
+    /**
+     * @param \Adldap\Models\Entry $user
+     * @throws AccountLockedException
+     */
+    public function assertUserNotDisabled($user)
+    {
+        if ($user->hasAttribute($this->userAccountDisabledAttribute)) {
+            $value = $user->getAttribute($this->userAccountDisabledAttribute);
+            if (is_array($value)) {
+                $value = $value[0];
+            }
+            if (strtolower($value) === strtolower($this->userAccountDisabledValue)) {
+                throw new AccountLockedException('User account is disabled', 1472740480);
+            }
+        }
+    }
+
+    /**
+     * conditionally build ldap search criteria
+     * @return array
+     */
+    public function getSearchCriteria()
+    {
+        $criteria = [
+            $this->passwordExpireDateAttribute,
+            $this->passwordLastChangeDateAttribute,
+        ];
+        if ( ! empty($this->userAccountDisabledAttribute)) {
+            $criteria[] = $this->userAccountDisabledAttribute;
+        }
+        if ( is_array($this->updateAttributesOnSetPassword)) {
+            $criteria = array_merge(
+                $criteria,
+                array_keys($this->updateAttributesOnSetPassword)
+            );
+        }
+        if ( is_array($this->removeAttributesOnSetPassword)) {
+            $criteria = array_merge($criteria, $this->removeAttributesOnSetPassword);
+        }
+
+        return $criteria;
+    }
+
+    /**
+     * @param string $employeeId
+     * @return \Adldap\Models\Entry
+     * @throws UserNotFoundException
+     */
+    public function findUser($employeeId)
+    {
+        $this->connect();
+        $criteria = $this->getSearchCriteria();
+
+        try {
+            /** @var \Adldap\Models\Entry $user */
+            $user = $this->ldapProvider->search()
+                ->select($criteria)
+                ->findByOrFail($this->employeeIdAttribute, $employeeId);
+        } catch (\Exception $e) {
+            throw new UserNotFoundException('User not found', 1463493653, $e);
+        }
+
+        return $user;
+    }
+
 }
