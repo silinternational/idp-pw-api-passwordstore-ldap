@@ -3,7 +3,7 @@ namespace tests;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Sil\IdpPw\PasswordStore\Ldap;
+use Sil\IdpPw\PasswordStore\Ldap\Ldap;
 
 class LdapTest extends \PHPUnit_Framework_TestCase
 {

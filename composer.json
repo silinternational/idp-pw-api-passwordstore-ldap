@@ -25,7 +25,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Sil\\IdpPw\\PasswordStore\\": "src/"
+      "Sil\\IdpPw\\PasswordStore\\Ldap\\": "src/"
     }
   }
 }
