@@ -1,5 +1,5 @@
 <?php
-namespace Sil\IdpPw\PasswordStore;
+namespace Sil\IdpPw\PasswordStore\Ldap;
 
 use Adldap\Adldap;
 use Adldap\Connections\Provider;
