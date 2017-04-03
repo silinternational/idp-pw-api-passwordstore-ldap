@@ -17,7 +17,7 @@
   "minimum-stability": "stable",
   "require": {
     "php": ">=5.4.0",
-    "silinternational/idp-pw-api-common": "dev-master",
+    "silinternational/idp-pw-api-common": "^1.0",
     "adldap2/adldap2": "dev-master"
   },
   "require-dev": {
