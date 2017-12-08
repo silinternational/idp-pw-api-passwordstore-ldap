@@ -10,6 +10,7 @@ use Sil\IdpPw\Common\PasswordStore\PasswordStoreInterface;
 use Sil\IdpPw\Common\PasswordStore\PasswordReuseException;
 use Sil\IdpPw\Common\PasswordStore\UserNotFoundException;
 use Sil\IdpPw\Common\PasswordStore\UserPasswordMeta;
+use Sil\Psr3Adapters\Psr3SyslogLogger;
 use yii\base\Component;
 
 class Ldap extends Component implements PasswordStoreInterface
@@ -54,6 +55,12 @@ class Ldap extends Component implements PasswordStoreInterface
     public $userAccountDisabledValue;
 
     /**
+     * If set, only update password if given attribute is present and value matches
+     * @var array attributeName => value
+     */
+    public $updatePasswordIfAttributeAndValue;
+
+    /**
      * Single dimension array of attribute names to be removed after password is changed.
      * This is helpful when certain flags may be set like lock status.
      * Example: ['pwdPolicySubentry']
@@ -74,6 +81,15 @@ class Ldap extends Component implements PasswordStoreInterface
 
     /** @var \Adldap\Adldap LDAP client*/
     public $ldapClient;
+
+    /** @var \Psr\Log\LoggerInterface */
+    public $logger;
+
+    public function init()
+    {
+        parent::init();
+        $this->logger = new Psr3SyslogLogger();
+    }
 
     /**
      * Connect and bind to ldap server
@@ -157,11 +173,27 @@ class Ldap extends Component implements PasswordStoreInterface
     public function set($employeeId, $password)
     {
         $user = $this->findUser($employeeId);
+        $logIdentifier = $user->hasAttribute('mail') ? $user->getAttribute('mail')[0] : $employeeId;
+
+        /*
+         * If $this->updatePasswordIfAttributeAndValue is defined and is an array,
+         * check that user has given attribute and value matches. If not, return now
+         * and consider change successful
+         */
+        if ( ! $this->matchesRequiredAttributes($user)) {
+            $this->logger->notice(sprintf(
+                "Skipping password update in LDAP for user %s because they do not match required attributes: %s",
+                $logIdentifier,
+                json_encode($this->updatePasswordIfAttributeAndValue)
+            ));
+            return $this->getMeta($employeeId);
+        }
 
         /*
          * Make sure user is not disabled
          */
         $this->assertUserNotDisabled($user);
+
 
         /*
          * Update password
@@ -221,7 +253,37 @@ class Ldap extends Component implements PasswordStoreInterface
             throw new \Exception('Unable to change password, server error.', 1464018242, $e);
         }
 
+        $this->logger->notice(sprintf(
+            "Password updated in LDAP for user %s",
+            $logIdentifier
+        ));
+
         return $this->getMeta($employeeId);
+    }
+
+    public function matchesRequiredAttributes($user)
+    {
+        // If not defined, just return true to continue processing as normal
+        if ( ! is_array($this->updatePasswordIfAttributeAndValue)) {
+            return true;
+        }
+
+        // Ensure each attribute is present and value matches, else return false
+        foreach ($this->updatePasswordIfAttributeAndValue as $key => $value) {
+            if ($user->hasAttribute($key)) {
+                $value = $user->getAttribute($key);
+                if (is_array($value)) {
+                    $value = $value[0] ?? null;
+                }
+                if (strtolower($value) !== strtolower($value)) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -250,6 +312,7 @@ class Ldap extends Component implements PasswordStoreInterface
         $criteria = [
             $this->passwordExpireDateAttribute,
             $this->passwordLastChangeDateAttribute,
+            'mail',
         ];
         if ( ! empty($this->userAccountDisabledAttribute)) {
             $criteria[] = $this->userAccountDisabledAttribute;
@@ -262,6 +325,11 @@ class Ldap extends Component implements PasswordStoreInterface
         }
         if ( is_array($this->removeAttributesOnSetPassword)) {
             $criteria = array_merge($criteria, $this->removeAttributesOnSetPassword);
+        }
+        if ( is_array($this->updatePasswordIfAttributeAndValue)) {
+            foreach ($this->updatePasswordIfAttributeAndValue as $key => $value) {
+                $criteria[] = $key;
+            }
         }
 
         return $criteria;
