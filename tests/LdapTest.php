@@ -185,6 +185,34 @@ class LdapTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($beforePassword, $afterPassword);
     }
 
+    public function testSetPasswordWithoutSpecifyingMatchingAttributeAndValue()
+    {
+        $ldap = $this->getClient();
+        $ldap->connect();
+        $ldap->set('10171', 'startpassword');
+        /** @var \Adldap\Models\Entry $user */
+        $user = $ldap->ldapProvider->search()
+            ->select(['userPassword'])
+            ->findByOrFail($ldap->employeeIdAttribute, '10171');
+        $beforePassword = $user->getAttribute('userpassword');
+
+
+        $ldap = $this->getClient();
+        $ldap->connect();
+        $ldap->set('10171', 'newpassword');
+
+
+
+        $ldap = $this->getClient();
+        $ldap->connect();
+        $user = $ldap->ldapProvider->search()
+            ->select(['userPassword'])
+            ->findByOrFail($ldap->employeeIdAttribute, '10171');
+        $afterPassword = $user->getAttribute('userpassword');
+
+        $this->assertNotEquals($beforePassword, $afterPassword);
+    }
+
     /**
      * @return Ldap
      */
