@@ -10,7 +10,6 @@ use Sil\IdpPw\Common\PasswordStore\PasswordStoreInterface;
 use Sil\IdpPw\Common\PasswordStore\PasswordReuseException;
 use Sil\IdpPw\Common\PasswordStore\UserNotFoundException;
 use Sil\IdpPw\Common\PasswordStore\UserPasswordMeta;
-use Sil\Psr3Adapters\Psr3SyslogLogger;
 use yii\base\Component;
 
 class Ldap extends Component implements PasswordStoreInterface
@@ -81,15 +80,6 @@ class Ldap extends Component implements PasswordStoreInterface
 
     /** @var \Adldap\Adldap LDAP client*/
     public $ldapClient;
-
-    /** @var \Psr\Log\LoggerInterface */
-    public $logger;
-
-    public function init()
-    {
-        parent::init();
-        $this->logger = new Psr3SyslogLogger();
-    }
 
     /**
      * Connect and bind to ldap server
@@ -181,11 +171,20 @@ class Ldap extends Component implements PasswordStoreInterface
          * and consider change successful
          */
         if ( ! $this->matchesRequiredAttributes($user)) {
-            $this->logger->notice(sprintf(
-                "Skipping password update in LDAP for user %s because they do not match required attributes: %s",
-                $logIdentifier,
-                json_encode($this->updatePasswordIfAttributeAndValue)
-            ));
+            try {
+                \Yii::warning(
+                    [
+                        'action' => 'set password in ldap store',
+                        'message' => sprintf(
+                            "Skipping password update in LDAP for user %s because they do not match required attributes: %s",
+                            $logIdentifier,
+                            json_encode($this->updatePasswordIfAttributeAndValue)
+                        ),
+                    ]
+                );
+            } catch (\Throwable $e) {
+                // ignoring
+            }
             return $this->getMeta($employeeId);
         }
 
@@ -253,10 +252,15 @@ class Ldap extends Component implements PasswordStoreInterface
             throw new \Exception('Unable to change password, server error.', 1464018242, $e);
         }
 
-        $this->logger->notice(sprintf(
-            "Password updated in LDAP for user %s",
-            $logIdentifier
-        ));
+        try {
+            \Yii::warning([
+                'action' => 'set password in ldap store',
+                'status' => 'success',
+                'user' => $logIdentifier,
+            ]);
+        } catch (\Throwable $e) {
+            // ignore
+        }
 
         return $this->getMeta($employeeId);
     }
