@@ -275,11 +275,11 @@ class Ldap extends Component implements PasswordStoreInterface
         // Ensure each attribute is present and value matches, else return false
         foreach ($this->updatePasswordIfAttributeAndValue as $key => $value) {
             if ($user->hasAttribute($key)) {
-                $value = $user->getAttribute($key);
-                if (is_array($value)) {
-                    $value = $value[0] ?? null;
+                $userValue = $user->getAttribute($key);
+                if (is_array($userValue)) {
+                    $userValue = $userValue[0] ?? null;
                 }
-                if (strtolower($value) !== strtolower($value)) {
+                if (strtolower($value) !== strtolower($userValue)) {
                     return false;
                 }
             } else {
