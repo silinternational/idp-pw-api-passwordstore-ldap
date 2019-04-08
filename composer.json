@@ -19,7 +19,8 @@
     "php": ">=7.0",
     "roave/security-advisories": "dev-master",
     "silinternational/idp-pw-api-common": "^1.0",
-    "adldap2/adldap2": "dev-master"
+    "adldap2/adldap2": "dev-master",
+    "ext-iconv": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.0"
